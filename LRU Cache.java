@@ -1,3 +1,149 @@
+Intuition
+To achieve O(1) time complexity for both operations, we need to think about what data structures give us constant-time access and updates.
+
+A hash table immediately comes to mind for O(1) lookups - we can store key-value pairs and retrieve them instantly. However, a hash table alone doesn't maintain any ordering information. We need to track which items were used recently and which weren't.
+
+For maintaining order, we could consider using an array or list where the most recently used item is at one end and the least recently used is at the other. But here's the problem: when we access an item in the middle, we'd need to move it to the front, which takes O(n) time in an array.
+
+This is where the doubly linked list becomes crucial. With a doubly linked list:
+
+We can remove a node from anywhere in the list in O(1) time (if we have a reference to the node)
+We can add a node to the head or tail in O(1) time
+The order of nodes naturally represents the usage order
+The key insight is combining these two data structures:
+
+Hash table: Maps keys to node references in the linked list, giving us O(1) access to any node
+Doubly linked list: Maintains the usage order, with the head being most recently used and tail being least recently used
+When we get or put an existing key, we:
+
+Find the node instantly via the hash table (O(1))
+Remove it from its current position in the list (O(1))
+Add it to the head of the list (O(1))
+When the cache is full and we need to evict, we simply remove the tail node (O(1)).
+
+The dummy head and tail nodes in the implementation are a clever trick to avoid null checks and edge cases when the list is empty or has only one element. They act as sentinels, making the add and remove operations uniform regardless of the list state.
+
+
+Solution Approach
+The implementation uses a hash table combined with a doubly linked list to achieve O(1) operations.
+
+Data Structures:
+
+Node Class: Represents each cache entry with:
+
+key and val: Store the key-value pair
+prev and next: Pointers to maintain the doubly linked list
+LRUCache Class maintains:
+
+cache: A hash table (dictionary) mapping keys to their corresponding nodes
+head and tail: Dummy sentinel nodes to simplify list operations
+size: Current number of items in the cache
+capacity: Maximum allowed items
+Key Helper Methods:
+
+remove_node(node): Removes a node from its current position in the list
+
+node.prev.next = node.next
+node.next.prev = node.prev
+This bypasses the node by connecting its neighbors directly to each other.
+
+add_to_head(node): Adds a node right after the dummy head
+
+node.next = self.head.next
+node.prev = self.head
+self.head.next = node
+node.next.prev = node
+This inserts the node between the head and the first actual node.
+
+Main Operations:
+
+get(key):
+
+Check if key exists in the hash table
+If not found, return -1
+If found, move the node to the head (marking it as most recently used):
+Remove it from current position
+Add it to the head
+Return the node's value
+put(key, value):
+
+If key exists: Update the existing node
+Remove it from current position
+Update its value
+Move it to the head
+If key doesn't exist: Create a new node
+Create new node with the key-value pair
+Add it to the hash table
+Add it to the head of the list
+Increment size
+If capacity exceeded: Evict the LRU item
+The LRU item is at tail.prev (the node just before the dummy tail)
+Remove it from the hash table
+Remove it from the linked list
+Decrement size
+The dummy head and tail nodes eliminate edge cases:
+
+The list is never truly empty (always has head and tail)
+No null checks needed when adding or removing nodes
+The actual cache items exist between head and tail
+This design ensures all operations maintain O(1) time complexity while keeping track of usage order efficiently.
+
+Ready to land your dream job?
+Unlock your dream job with a 5-minute evaluator for a personalized learning plan!
+Example Walkthrough
+Let's walk through a concrete example with an LRU cache of capacity 2 to see how the data structure works internally.
+
+Initial State:
+
+Cache capacity: 2
+Hash table: {} (empty)
+Linked list: [head] ↔ [tail] (only dummy nodes)
+Operation 1: put(1, 10)
+
+Create new node with key=1, value=10
+Add to hash table: {1: node1}
+Insert node after head: [head] ↔ [1,10] ↔ [tail]
+Size becomes 1
+Operation 2: put(2, 20)
+
+Create new node with key=2, value=20
+Add to hash table: {1: node1, 2: node2}
+Insert node after head: [head] ↔ [2,20] ↔ [1,10] ↔ [tail]
+Size becomes 2
+Note: Node 2 is now most recently used (closest to head)
+Operation 3: get(1) → returns 10
+
+Look up key 1 in hash table - found!
+Remove node1 from its current position: [head] ↔ [2,20] ↔ [tail]
+Add node1 after head: [head] ↔ [1,10] ↔ [2,20] ↔ [tail]
+Return value 10
+Note: Node 1 is now most recently used
+Operation 4: put(3, 30) (capacity exceeded!)
+
+Size is 2, capacity is 2 → need to evict
+LRU item is at tail.prev which is node2 (key=2)
+Remove node2 from hash table: {1: node1}
+Remove node2 from list: [head] ↔ [1,10] ↔ [tail]
+Create new node with key=3, value=30
+Add to hash table: {1: node1, 3: node3}
+Insert node3 after head: [head] ↔ [3,30] ↔ [1,10] ↔ [tail]
+Operation 5: get(2) → returns -1
+
+Look up key 2 in hash table - not found!
+Return -1 (key 2 was evicted earlier)
+Final State:
+
+Hash table: {1: node1, 3: node3}
+Linked list: [head] ↔ [3,30] ↔ [1,10] ↔ [tail]
+Most recently used: key 3
+Least recently used: key 1
+This example demonstrates how:
+
+The hash table provides O(1) lookups
+The linked list maintains usage order (head = most recent, tail = least recent)
+Every access (get or put) moves items to the head
+Eviction always happens at the tail when capacity is exceeded
+
 /**
  * Node class for doubly linked list implementation
  * Each node stores a key-value pair and pointers to previous and next nodes
