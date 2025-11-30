@@ -1,3 +1,38 @@
+Approach
+Use a greedy approach to collect as many words as possible for each line.
+For lines with more than one word and not the last line, evenly distribute spaces.
+For lines with one word or the last line, left-justify and pad with spaces to the right.
+Example Explanation
+Input:
+
+words = ["This", "is", "an", "example", "of", "text", "justification."]
+maxWidth = 16
+Step-by-step:
+First Line:
+
+Try fitting: "This is an" → Total length = 4 + 2 + 2 = 8 characters
+Spaces needed = 16 - 8 = 8
+Gaps = 2 → Each gap gets 4 spaces
+Result: "This is an"
+Second Line:
+
+Try fitting: "example of text" → Length = 7 + 2 + 4 = 13
+Spaces = 3, Gaps = 2 → 1 space + 1 extra to the left gap
+Result: "example of text"
+Third Line:
+
+Only "justification." left
+Left-justified with spaces at end
+Result: "justification. "
+Output:
+
+[
+  "This    is    an",
+  "example  of text",
+  "justification.  "
+
+    ]
+Code
 class Solution {
     public List<String> fullJustify(String[] words, int maxWidth) {
         List<String> result = new ArrayList<>();
@@ -34,3 +69,6 @@ class Solution {
         return result;
     }
 }
+Time & Space Complexity
+Time Complexity: (O(N)), where N is the number of words.
+Space Complexity: (O(N)), for storing the result lines.
