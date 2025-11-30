@@ -1,3 +1,4 @@
+
 // Approach 1: Precompute Left and Right Max Arrays (O(N) Time, O(N) Space)
 class Solution {
     public int trap(int[] arr) {
