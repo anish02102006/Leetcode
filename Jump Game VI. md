@@ -1,0 +1,207 @@
+Below is a **complete A→Z explanation of LeetCode “Jump Game VI”**, including **intuition, approach, dry run, and optimized Java code**.
+I’ll explain it in a **DSA-friendly way**, since you’re actively doing LeetCode in Java.
+
+---
+
+## 🔹 Problem: Jump Game VI (LeetCode 1696)
+
+### 🔸 Problem Statement (Simplified)
+
+You are given:
+
+* An integer array `nums`
+* An integer `k`
+
+You start at **index 0** and want to reach **last index (n-1)**.
+
+From index `i`, you can jump to **any index `j`** such that:
+
+```
+i < j ≤ i + k
+```
+
+Your **score** is the **sum of values of visited indices**.
+
+👉 **Return the maximum score possible** to reach the last index.
+
+---
+
+## 🔹 Example
+
+### Example 1
+
+```
+nums = [1, -1, -2, 4, -7, 3]
+k = 2
+```
+
+### Optimal Path
+
+```
+Index: 0 → 1 → 3 → 5
+Score: 1 + (-1) + 4 + 3 = 7
+```
+
+✅ **Answer = 7**
+
+---
+
+## 🔹 Brute Force (Why it Fails)
+
+### DP Idea
+
+Let:
+
+```
+dp[i] = max score to reach index i
+```
+
+Transition:
+
+```
+dp[i] = nums[i] + max(dp[j]) for j in [i-k, i-1]
+```
+
+⛔ Time Complexity:
+
+```
+O(n * k) → TLE for n = 10^5
+```
+
+We need optimization.
+
+---
+
+## 🔹 Key Insight (Optimization)
+
+We **only need the maximum dp value in the last k indices**.
+
+👉 This is a **Sliding Window Maximum** problem
+👉 Use **Deque (Monotonic Queue)**
+
+---
+
+## 🔹 Optimized Approach (Deque + DP)
+
+### 🔸 Why Deque?
+
+* Front always stores **index of max dp value**
+* Remove:
+
+  * Indices **out of window**
+  * dp values **smaller than current**
+
+---
+
+## 🔹 Step-by-Step Algorithm
+
+1. Create `dp[]` array
+2. `dp[0] = nums[0]`
+3. Use `Deque<Integer>` to store indices
+4. For each index `i` from `1 → n-1`:
+
+   * Remove indices `< i-k`
+   * `dp[i] = nums[i] + dp[deque.front()]`
+   * Remove smaller dp values from back
+   * Add current index to deque
+5. Return `dp[n-1]`
+
+---
+
+## 🔹 Dry Run (Quick)
+
+```
+nums = [1, -1, -2, 4, -7, 3]
+k = 2
+```
+
+| i | dp[i] | deque |
+| - | ----- | ----- |
+| 0 | 1     | [0]   |
+| 1 | 0     | [0,1] |
+| 2 | -1    | [1,2] |
+| 3 | 4     | [3]   |
+| 4 | -3    | [3,4] |
+| 5 | 7     | [5]   |
+
+✅ Answer = `7`
+
+---
+
+## 🔹 Java Code (Correct Method Signature)
+
+```java
+import java.util.*;
+
+class Solution {
+    public int maxResult(int[] nums, int k) {
+        int n = nums.length;
+        int[] dp = new int[n];
+        dp[0] = nums[0];
+
+        Deque<Integer> deque = new ArrayDeque<>();
+        deque.offer(0);
+
+        for (int i = 1; i < n; i++) {
+
+            // Remove indices out of window
+            while (!deque.isEmpty() && deque.peekFirst() < i - k) {
+                deque.pollFirst();
+            }
+
+            // Best dp value is at front
+            dp[i] = nums[i] + dp[deque.peekFirst()];
+
+            // Maintain decreasing dp values
+            while (!deque.isEmpty() && dp[deque.peekLast()] <= dp[i]) {
+                deque.pollLast();
+            }
+
+            deque.offerLast(i);
+        }
+
+        return dp[n - 1];
+    }
+}
+```
+
+---
+
+## 🔹 Time & Space Complexity
+
+| Type  | Complexity |
+| ----- | ---------- |
+| Time  | **O(n)**   |
+| Space | **O(n)**   |
+
+---
+
+## 🔹 Why This Problem is Important
+
+✅ Tests:
+
+* Sliding Window Maximum
+* Deque mastery
+* DP Optimization
+* Interview favorite (Google, Amazon)
+
+---
+
+## 🔹 Similar Problems to Practice
+
+* Jump Game I & II
+* Sliding Window Maximum
+* Constrained Subsequence Sum
+* Maximum Sum Circular Subarray
+
+---
+
+If you want next:
+
+* 🔥 **Line-by-line explanation**
+* 🔥 **Dry run with diagrams**
+* 🔥 **Interview explanation**
+* 🔥 **Convert to Python**
+* 🔥 **Compare with PriorityQueue approach**
+
+Just tell me 👌
