@@ -1,0 +1,218 @@
+Chalo 🔥
+**LeetCode 424 – Longest Repeating Character Replacement** ko **interview-level clarity** ke saath samajhte hain
+👉 **Brute → Better → Optimal (Sliding Window)**
+👉 **Hinglish explanation + intuition + Java code + dry run**
+
+---
+
+## 🧠 Problem Samajh Lo
+
+Tumhe ek **string `s`** (sirf uppercase letters) aur ek integer **`k`** diya hai.
+
+👉 Tum **maximum length ka substring** find karo jisme:
+
+* Tum **at most `k` characters replace** kar sakte ho
+* Taaki substring ke **saare characters same ho jaayein**
+
+---
+
+### Example:
+
+```
+s = "AABABBA"
+k = 1
+```
+
+Possible:
+
+```
+"AABA" → replace B → A
+"ABBA" → replace A → B
+```
+
+👉 **Answer = 4**
+
+---
+
+## 🔑 Key Observation
+
+Substring valid tab hoga jab:
+
+```
+window_length - max_frequency_in_window <= k
+```
+
+Kyuki:
+
+* `max_frequency` = jo character sabse zyada baar aa raha
+* Baaki characters ko replace karna padega
+
+---
+
+# 🟥 Brute Force Approach
+
+## 💡 Idea:
+
+* Har substring consider karo
+* Uska frequency count nikalo
+* Check karo kitne replacements chahiye
+
+---
+
+### ❌ Java Code (Brute)
+
+```java
+class Solution {
+    public int characterReplacement(String s, int k) {
+        int n = s.length();
+        int maxLen = 0;
+
+        for (int i = 0; i < n; i++) {
+            int[] freq = new int[26];
+            int maxFreq = 0;
+
+            for (int j = i; j < n; j++) {
+                freq[s.charAt(j) - 'A']++;
+                maxFreq = Math.max(maxFreq, freq[s.charAt(j) - 'A']);
+
+                if ((j - i + 1) - maxFreq <= k) {
+                    maxLen = Math.max(maxLen, j - i + 1);
+                }
+            }
+        }
+        return maxLen;
+    }
+}
+```
+
+⏱ **Time:** O(N² × 26)
+📦 **Space:** O(26)
+❌ TLE for large inputs
+
+---
+
+# 🟡 Better Approach
+
+* Same logic
+* Frequency reuse
+* Still O(N²)
+
+👉 Not interview-friendly
+
+---
+
+# 🟢 Optimal Approach (Sliding Window)
+
+🔥 **Most important sliding window problem**
+
+---
+
+## 💡 Core Idea:
+
+* Window maintain karo
+* Frequency array rakho
+* Track karo **max repeating character count**
+* Window tab tak valid jab:
+
+```
+window_size - maxFreq <= k
+```
+
+---
+
+## 🧠 Sliding Window Steps:
+
+1. `left = 0`
+2. `freq[26]`
+3. `maxFreq = 0`
+4. `right` badhao
+5. Agar invalid → `left++`
+
+---
+
+### 🧪 Dry Run (Short)
+
+```
+s = "AABABBA", k = 1
+
+Window: "AABA"
+Freq(A)=3, B=1
+4 - 3 = 1 ≤ k ✔
+```
+
+---
+
+### ✅ Java Code (Optimal)
+
+```java
+class Solution {
+    public int characterReplacement(String s, int k) {
+        int[] freq = new int[26];
+        int left = 0;
+        int maxFreq = 0;
+        int maxLen = 0;
+
+        for (int right = 0; right < s.length(); right++) {
+            char c = s.charAt(right);
+            freq[c - 'A']++;
+            maxFreq = Math.max(maxFreq, freq[c - 'A']);
+
+            while ((right - left + 1) - maxFreq > k) {
+                freq[s.charAt(left) - 'A']--;
+                left++;
+            }
+
+            maxLen = Math.max(maxLen, right - left + 1);
+        }
+        return maxLen;
+    }
+}
+```
+
+---
+
+### ⏱ Complexity:
+
+* **Time:** O(N)
+* **Space:** O(26) → O(1)
+
+⭐ Interview favorite
+⭐ Amazon / Google / Microsoft standard
+
+---
+
+## ❓ Important Doubt (Interview Trick Question)
+
+**Q: maxFreq kabhi kam kyu nahi karte?**
+
+👉 Kyuki:
+
+* maxFreq sirf **window expand** hone pe update hota
+* Thoda inaccurate ho sakta hai, but window size kabhi galat answer nahi dega
+* Overall correctness maintain hoti hai
+
+---
+
+# 📊 Comparison Table
+
+| Approach       | Time  | Space | Verdict |
+| -------------- | ----- | ----- | ------- |
+| Brute          | O(N²) | O(1)  | ❌       |
+| Sliding Window | O(N)  | O(1)  | ⭐ BEST  |
+
+---
+
+## 🎯 Interview One-Liner
+
+> “We use a sliding window where we keep track of the most frequent character, and ensure that replacements needed are at most k.”
+
+---
+
+Agar chaho:
+
+* 🧠 **Deep intuition**
+* 🔍 **Full dry run table**
+* 🧪 **Edge cases**
+* 🔗 **Related sliding window problems list**
+
+Bas bol do 😄
